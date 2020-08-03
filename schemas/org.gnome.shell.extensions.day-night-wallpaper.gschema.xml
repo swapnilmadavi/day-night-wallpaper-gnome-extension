@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.day-night-wallpaper" path="/org/gnome/shell/extensions/day-night-wallpaper/">
+    
+    <key name="show-indicator" type="b">
+      <default>true</default>
+      <summary>Boolean Sum-sum-summary</summary>
+      <description>Boolean Des-des-description</description>
+    </key>
+
+  </schema>
+</schemalist>
