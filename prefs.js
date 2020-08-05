@@ -1,67 +1,86 @@
 'use strict';
 
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
+const { Gio, GObject, Gtk } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-class PrefsWidgetBuilder {
-    constructor() {
-        this.prefsWidget = new Gtk.Grid({
-            margin: 18,
-            column_spacing: 12,
-            row_spacing: 12,
-            column_homogeneous: true,
-            visible: true
-        });
-    }
+const DayNightWallpaperPrefsWidget = GObject.registerClass(
+    class DayNightWallpaperPrefsWidget extends Gtk.Grid {
+        _init() {
+            super._init({
+                margin: 18,
+                column_spacing: 12,
+                row_spacing: 12,
+                // column_homogeneous: true
+            })
 
-    attachWallpapersSection() {
-        // Wallpapers Header
-        let title = new Gtk.Label({
-            label: '<b>Wallpapers</b>',
-            halign: Gtk.Align.START,
-            use_markup: true,
-            visible: true
-        });
-        this.prefsWidget.attach(title, 0, 0, 2, 1);
-    
-        // Day Wallpaper
-        let dayWallpaperLabel = new Gtk.Label({
-            label: 'Day',
-            visible: true
-        });
-        this.prefsWidget.attach(dayWallpaperLabel, 0, 1, 1, 1);
-    
-        let dayWallpaperChooserButton = new Gtk.FileChooserButton({
-            title: 'Day Wallpaper',
-            action: Gtk.FileChooserAction.OPEN,
-            // filter: filter,
-            visible: true
-        });
-        this.prefsWidget.attach(dayWallpaperChooserButton, 1, 1, 1, 1);
-    
-        // Night Wallpaper
-        let nightWallpaperLabel = new Gtk.Label({
-            label: 'Night',
-            visible: true
-        });
-        this.prefsWidget.attach(nightWallpaperLabel, 0, 2, 1, 1);
-    
-        let nightWallpaperChooserButton = new Gtk.FileChooserButton({
-            title: 'Night Wallpaper',
-            action: Gtk.FileChooserAction.OPEN,
-            visible: true
-        });
-        this.prefsWidget.attach(nightWallpaperChooserButton, 1, 2, 1, 1);
-    }
+            // Wallpapers section
+            const wallpapersSectionLabel = new Gtk.Label({
+                label: '<b>Wallpapers</b>',
+                halign: Gtk.Align.START,
+                use_markup: true
+            });
+            this.attach(wallpapersSectionLabel, 0, 0, 2, 1);
 
-    build() {
-      this.attachWallpapersSection()
-      return this.prefsWidget
-    }
-} 
+            // Day Wallpaper
+            const dayWallpaperLabel = new Gtk.Label({
+                label: 'Day',
+                halign: Gtk.Align.START,
+                hexpand: true
+            });
+            this.attach(dayWallpaperLabel, 0, 1, 1, 1);
+        
+            const dayWallpaperChooserButton = new Gtk.FileChooserButton({
+                title: 'Day Wallpaper',
+                action: Gtk.FileChooserAction.OPEN,
+                halign: Gtk.Align.END,
+                width_chars: 40
+                // filter: filter,
+            });
+            this.attach_next_to(dayWallpaperChooserButton, dayWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
+        
+            // Night Wallpaper
+            const nightWallpaperLabel = new Gtk.Label({
+                label: 'Night',
+                halign: Gtk.Align.START,
+                hexpand: true
+            });
+            this.attach(nightWallpaperLabel, 0, 2, 1, 1);
+        
+            const nightWallpaperChooserButton = new Gtk.FileChooserButton({
+                title: 'Night Wallpaper',
+                action: Gtk.FileChooserAction.OPEN,
+                halign: Gtk.Align.END,
+                width_chars: 40
+            });
+            this.attach_next_to(nightWallpaperChooserButton, nightWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
+
+            // Switch Times section
+            const switchTimesSectionLabel = new Gtk.Label({
+                label: '<b>Switch Times</b>',
+                halign: Gtk.Align.START,
+                use_markup: true
+            });
+            this.attach(switchTimesSectionLabel, 0, 3, 2, 1);
+
+            // Day Wallpaper
+            const dayWallpaperLabel1 = new Gtk.Label({
+                label: 'Day Time',
+                halign: Gtk.Align.START,
+                hexpand: true
+            });
+            this.attach(dayWallpaperLabel1, 0, 4, 1, 1);
+        
+            const dayWallpaperChooserButton1 = new Gtk.FileChooserButton({
+                title: 'Day Wallpaper',
+                action: Gtk.FileChooserAction.OPEN,
+                halign: Gtk.Align.END,
+                width_chars: 40
+            });
+            this.attach_next_to(dayWallpaperChooserButton1, dayWallpaperLabel1, Gtk.PositionType.RIGHT, 1, 1);
+        }
+    });
 
 function init() {
 }
@@ -79,7 +98,10 @@ function buildPrefsWidget() {
     });
 
     // Parent prefs window
-    let prefsWidget = new PrefsWidgetBuilder().build()
+    let prefsWidget = new DayNightWallpaperPrefsWidget();
+    prefsWidget.show_all();
+
+    return prefsWidget;
 
     // let filter = new Gtk.FileFilter();
     // filter.add_mime_type('image/*');
@@ -91,7 +113,4 @@ function buildPrefsWidget() {
     //     'active',
     //     Gio.SettingsBindFlags.DEFAULT
     // );
-
-    // Return our widget which will be added to the window
-    return prefsWidget;
 }
