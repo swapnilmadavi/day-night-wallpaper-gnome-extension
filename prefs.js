@@ -23,6 +23,14 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
             });
             this.attach(wallpapersSectionLabel, 0, 0, 2, 1);
 
+            // Wallpaper files filter
+            const wallpaperFileFilter = new Gtk.FileFilter();
+            wallpaperFileFilter.set_name('Image files');
+            wallpaperFileFilter.add_mime_type('image/jpg');
+            wallpaperFileFilter.add_mime_type('image/png');
+            wallpaperFileFilter.add_mime_type('image/jpeg');
+            wallpaperFileFilter.add_mime_type('image/bmp');
+
             // Day Wallpaper
             const dayWallpaperLabel = new Gtk.Label({
                 label: 'Day',
@@ -35,8 +43,8 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 title: 'Day Wallpaper',
                 action: Gtk.FileChooserAction.OPEN,
                 halign: Gtk.Align.END,
-                width_chars: 40
-                // filter: filter,
+                width_chars: 40,
+                filter: wallpaperFileFilter
             });
             this.attach_next_to(dayWallpaperChooserButton, dayWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
         
@@ -52,7 +60,8 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 title: 'Night Wallpaper',
                 action: Gtk.FileChooserAction.OPEN,
                 halign: Gtk.Align.END,
-                width_chars: 40
+                width_chars: 40,
+                filter: wallpaperFileFilter
             });
             this.attach_next_to(nightWallpaperChooserButton, nightWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
 
