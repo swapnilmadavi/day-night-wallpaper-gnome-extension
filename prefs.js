@@ -1,3 +1,5 @@
+#!/usr/bin/gjs
+
 'use strict';
 
 const { Gio, GObject, Gtk } = imports.gi;
@@ -37,7 +39,6 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 halign: Gtk.Align.START,
                 hexpand: true
             });
-            this.attach(dayWallpaperLabel, 0, 1, 1, 1);
         
             const dayWallpaperChooserButton = new Gtk.FileChooserButton({
                 title: 'Day Wallpaper',
@@ -46,6 +47,8 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 width_chars: 40,
                 filter: wallpaperFileFilter
             });
+
+            this.attach(dayWallpaperLabel, 0, 1, 1, 1);
             this.attach_next_to(dayWallpaperChooserButton, dayWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
         
             // Night Wallpaper
@@ -54,7 +57,6 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 halign: Gtk.Align.START,
                 hexpand: true
             });
-            this.attach(nightWallpaperLabel, 0, 2, 1, 1);
         
             const nightWallpaperChooserButton = new Gtk.FileChooserButton({
                 title: 'Night Wallpaper',
@@ -63,6 +65,8 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 width_chars: 40,
                 filter: wallpaperFileFilter
             });
+
+            this.attach(nightWallpaperLabel, 0, 2, 1, 1);
             this.attach_next_to(nightWallpaperChooserButton, nightWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
 
             // Switch Times section
@@ -73,22 +77,68 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
             });
             this.attach(switchTimesSectionLabel, 0, 3, 2, 1);
 
-            // Day Wallpaper
-            const dayWallpaperLabel1 = new Gtk.Label({
-                label: 'Day Time',
-                halign: Gtk.Align.START,
-                hexpand: true
-            });
-            this.attach(dayWallpaperLabel1, 0, 4, 1, 1);
-        
-            const dayWallpaperChooserButton1 = new Gtk.FileChooserButton({
-                title: 'Day Wallpaper',
-                action: Gtk.FileChooserAction.OPEN,
-                halign: Gtk.Align.END,
-                width_chars: 40
-            });
-            this.attach_next_to(dayWallpaperChooserButton1, dayWallpaperLabel1, Gtk.PositionType.RIGHT, 1, 1);
+            const switchTimesWidget = this._buildSwitchTimesWidget()
+            switchTimesWidget.set_halign(Gtk.Align.CENTER)
+            this.attach(switchTimesWidget, 0, 4, 2, 1);
         }
+
+        _buildSwitchTimesWidget() {
+            const timeWidget = new Gtk.Box({spacing: 4});
+            const hourSpinAdustment = new Gtk.Adjustment({
+                lower: 0,
+                upper: 23,
+                step_increment: 1
+            });
+            const minuteSpinAdustment = new Gtk.Adjustment({
+                lower: 0,
+                upper: 59,
+                step_increment: 1
+            });
+            
+            let timeColonLabel = Gtk.Label.new(':');
+
+            // Day Time
+            const dayHourSpinButton = new Gtk.SpinButton({
+                adjustment: hourSpinAdustment,
+                wrap: true,
+                max_width_chars: 2,
+                orientation: Gtk.Orientation.VERTICAL
+            });
+
+            const dayMinuteSpinButton = new Gtk.SpinButton({
+                adjustment: minuteSpinAdustment,
+                wrap: true,
+                max_width_chars: 2,
+                orientation: Gtk.Orientation.VERTICAL
+            });
+           
+            timeWidget.pack_start(dayHourSpinButton, false, false, 0);
+            timeWidget.pack_start(timeColonLabel, false, false, 0);
+            timeWidget.pack_start(dayMinuteSpinButton, false, false, 0);
+
+            // Night Time
+            const nightHourSpinButton = new Gtk.SpinButton({
+                adjustment: hourSpinAdustment,
+                wrap: true,
+                max_width_chars: 2,
+                orientation: Gtk.Orientation.VERTICAL
+            });
+
+            timeColonLabel = Gtk.Label.new(':');
+
+            const nightMinuteSpinButton = new Gtk.SpinButton({
+                adjustment: minuteSpinAdustment,
+                wrap: true,
+                max_width_chars: 2,
+                orientation: Gtk.Orientation.VERTICAL
+            });
+
+            timeWidget.pack_start(nightHourSpinButton, false, false, 0);
+            timeWidget.pack_start(timeColonLabel, false, false, 0);
+            timeWidget.pack_start(nightMinuteSpinButton, false, false, 0);
+
+            return timeWidget;
+        };
     });
 
 function init() {
