@@ -2,10 +2,16 @@
 <schemalist>
   <schema id="org.gnome.shell.extensions.day-night-wallpaper" path="/org/gnome/shell/extensions/day-night-wallpaper/">
 
-    <key name="show-indicator" type="b">
-      <default>true</default>
-      <summary>Boolean Sum-sum-summary</summary>
-      <description>Boolean Des-des-description</description>
+    <key name="day-wallpaper" type="s">
+      <default>''</default>
+      <summary>Day wallpaper</summary>
+      <description>Wallpaper to set at Day time</description>
+    </key>
+
+    <key name="night-wallpaper" type="s">
+      <default>''</default>
+      <summary>Night wallpaper</summary>
+      <description>Wallpaper to set at Night time</description>
     </key>
 
   </schema>

@@ -36,13 +36,27 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
             this.switchTimesSection = new SettingsUi.SwitchTimesSection();
             this.pack_start(switchTimesSectionLabel, false, true, 0);
             this.pack_start(this.switchTimesSection, false, true, 0);
+
+            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
+                let uri = dayWallpaperChooserButton.get_uri();
+                log(`Uri: ${uri}`);
+            });
+
+            this.wallpapersSection.dayWallpaperChooserButton.connect ('file-set', this._getACookie.bind(this));
+        }
+
+        _getACookie() {
+            this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.set_value(3);
         }
     });
 
 function init() {
+    print("Prefs init");
 }
 
 function buildPrefsWidget() {
+
+    print("inside buildPrefsWidget");
 
     let gschema = Gio.SettingsSchemaSource.new_from_directory(
         Me.dir.get_child('schemas').get_path(),
