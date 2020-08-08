@@ -24,7 +24,7 @@ function getSettings() {
 
 const DayNightWallpaperPrefsWidget = GObject.registerClass(
     class DayNightWallpaperPrefsWidget extends Gtk.Box {
-        _init() {
+        _init(settings) {
             super._init({
                 margin: 18,
                 spacing: 12,
@@ -38,6 +38,18 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 use_markup: true
             });
             this.wallpapersSection = new SettingsUi.WallpapersSection();
+            this.wallpapersSection.setDayWallpaperUri(settings.get_string('day-wallpaper'));
+            this.wallpapersSection.setNightWallpaperUri(settings.get_string('night-wallpaper'));
+
+            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
+                let wallpaperUri = this.wallpapersSection.getDayWallpaperUri()
+                settings.set_string('day-wallpaper', wallpaperUri);
+            });
+            this.wallpapersSection.nightWallpaperChooserButton.connect('file-set', () => {
+                let wallpaperUri = this.wallpapersSection.getNightWallpaperUri()
+                settings.set_string('night-wallpaper', wallpaperUri);
+            });
+
             this.pack_start(wallpapersSectionLabel, false, true, 0);
             this.pack_start(this.wallpapersSection, false, true, 0);
 
@@ -50,13 +62,6 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
             this.switchTimesSection = new SettingsUi.SwitchTimesSection();
             this.pack_start(switchTimesSectionLabel, false, true, 0);
             this.pack_start(this.switchTimesSection, false, true, 0);
-
-            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
-                let uri = dayWallpaperChooserButton.get_uri();
-                log(`Uri: ${uri}`);
-            });
-
-            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', this._getACookie.bind(this));
         }
 
         _getACookie() {
@@ -78,17 +83,8 @@ function init() {
 }
 
 function buildPrefsWidget() {
-    let gschema = Gio.SettingsSchemaSource.new_from_directory(
-        Me.dir.get_child('schemas').get_path(),
-        Gio.SettingsSchemaSource.get_default(),
-        false
-    );
-
-    this.settings = new Gio.Settings({
-        settings_schema: gschema.lookup('org.gnome.shell.extensions.day-night-wallpaper', true)
-    });
-
-    let prefsWidget = new DayNightWallpaperPrefsWidget();
+    let settings = getSettings();
+    let prefsWidget = new DayNightWallpaperPrefsWidget(settings);
     prefsWidget.show_all();
 
     return prefsWidget;

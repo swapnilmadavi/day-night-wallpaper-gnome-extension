@@ -3,7 +3,7 @@
 'use strict';
 
 function isWallpaperSet(extensionSettings, wallpaperKey) {
-    return extensionSettings.get_string(wallpaperKey) == '';
+    return extensionSettings.get_string(wallpaperKey) != '';
 }
 
 function fallbackToSystemWallpaper(extensionSettings, wallpaperKey) {

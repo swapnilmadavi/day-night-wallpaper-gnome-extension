@@ -56,6 +56,22 @@ var WallpapersSection = GObject.registerClass(
             this.attach(nightWallpaperLabel, 0, 2, 1, 1);
             this.attach_next_to(this.nightWallpaperChooserButton, nightWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
         }
+
+        setDayWallpaperUri(uri) {
+            this.dayWallpaperChooserButton.set_uri(uri);
+        }
+
+        setNightWallpaperUri(uri) {
+            this.nightWallpaperChooserButton.set_uri(uri);
+        }
+
+        getDayWallpaperUri() {
+            return this.dayWallpaperChooserButton.get_uri();
+        }
+
+        getNightWallpaperUri() {
+            return this.nightWallpaperChooserButton.get_uri();
+        }
     }
 );
 
