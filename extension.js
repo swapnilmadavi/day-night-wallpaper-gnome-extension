@@ -21,22 +21,18 @@ function getSettings() {
     return settings;
 }
 
-function initializeDefaultWallpaper(extensionSettings, key) {
-    let gnomeSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
-    let currentBackgroundUri = gnomeSettings.get_string('picture-uri');
-    extensionSettings.set_string(key, currentBackgroundUri);
-}
-
 function init() {
     log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
+
+    const Utils = Me.imports.utils;
     let settings = getSettings();
 
-    if (settings.get_string('day-wallpaper') == '') {
-        initializeDefaultWallpaper(settings, 'day-wallpaper')
+    if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
+        Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
     }
 
-    if (settings.get_string('night-wallpaper') == '') {
-        initializeDefaultWallpaper(settings, 'night-wallpaper')
+    if (!Utils.isWallpaperSet(settings, 'night-wallpaper')) {
+        Utils.fallbackToSystemWallpaper(settings, 'night-wallpaper')
     }
 }
 

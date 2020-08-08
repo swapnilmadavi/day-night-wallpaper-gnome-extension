@@ -8,6 +8,20 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
 
+function getSettings() {
+    let gschema = Gio.SettingsSchemaSource.new_from_directory(
+        Me.dir.get_child('schemas').get_path(),
+        Gio.SettingsSchemaSource.get_default(),
+        false
+    );
+
+    let settings = new Gio.Settings({
+        settings_schema: gschema.lookup('org.gnome.shell.extensions.day-night-wallpaper', true)
+    });
+
+    return settings;
+}
+
 const DayNightWallpaperPrefsWidget = GObject.registerClass(
     class DayNightWallpaperPrefsWidget extends Gtk.Box {
         _init() {
@@ -42,7 +56,7 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
                 log(`Uri: ${uri}`);
             });
 
-            this.wallpapersSection.dayWallpaperChooserButton.connect ('file-set', this._getACookie.bind(this));
+            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', this._getACookie.bind(this));
         }
 
         _getACookie() {
@@ -51,13 +65,19 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
     });
 
 function init() {
-    print("Prefs init");
+    const Utils = Me.imports.utils;
+    let settings = getSettings();
+
+    if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
+        Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
+    }
+
+    if (!Utils.isWallpaperSet(settings, 'night-wallpaper')) {
+        Utils.fallbackToSystemWallpaper(settings, 'night-wallpaper')
+    }
 }
 
 function buildPrefsWidget() {
-
-    print("inside buildPrefsWidget");
-
     let gschema = Gio.SettingsSchemaSource.new_from_directory(
         Me.dir.get_child('schemas').get_path(),
         Gio.SettingsSchemaSource.get_default(),
@@ -68,20 +88,8 @@ function buildPrefsWidget() {
         settings_schema: gschema.lookup('org.gnome.shell.extensions.day-night-wallpaper', true)
     });
 
-    // Parent prefs window
     let prefsWidget = new DayNightWallpaperPrefsWidget();
     prefsWidget.show_all();
 
     return prefsWidget;
-
-    // let filter = new Gtk.FileFilter();
-    // filter.add_mime_type('image/*');
-
-    // Bind the switch to the `show-indicator` key
-    // this.settings.bind(
-    //     'show-indicator',
-    //     toggle,
-    //     'active',
-    //     Gio.SettingsBindFlags.DEFAULT
-    // );
 }
