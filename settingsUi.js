@@ -11,7 +11,7 @@ var WallpapersSection = GObject.registerClass(
                 column_spacing: 12,
                 row_spacing: 12,
             })
-            
+
             // Wallpaper files filter
             const wallpaperFileFilter = new Gtk.FileFilter();
             wallpaperFileFilter.set_name('Image files');
@@ -26,7 +26,7 @@ var WallpapersSection = GObject.registerClass(
                 halign: Gtk.Align.START,
                 hexpand: true
             });
-        
+
             this.dayWallpaperChooserButton = new Gtk.FileChooserButton({
                 title: 'Day Wallpaper',
                 action: Gtk.FileChooserAction.OPEN,
@@ -37,14 +37,14 @@ var WallpapersSection = GObject.registerClass(
 
             this.attach(dayWallpaperLabel, 0, 1, 1, 1);
             this.attach_next_to(this.dayWallpaperChooserButton, dayWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
-        
+
             // Night Wallpaper
             const nightWallpaperLabel = new Gtk.Label({
                 label: 'Night',
                 halign: Gtk.Align.START,
                 hexpand: true
             });
-        
+
             this.nightWallpaperChooserButton = new Gtk.FileChooserButton({
                 title: 'Night Wallpaper',
                 action: Gtk.FileChooserAction.OPEN,
@@ -77,7 +77,7 @@ var SwitchTimeWidget = GObject.registerClass(
     class SwitchTimeWidget extends Gtk.Box {
         _init(title) {
             super._init({
-                orientation: Gtk.Orientation.VERTICAL, 
+                orientation: Gtk.Orientation.VERTICAL,
                 spacing: 6,
                 halign: Gtk.Align.CENTER
             })
@@ -98,7 +98,7 @@ var SwitchTimeWidget = GObject.registerClass(
             });
             const timeColonLabel = Gtk.Label.new(':');
 
-            this.timeWidget = new Gtk.Box({spacing: 4, halign: Gtk.Align.CENTER});
+            this.timeWidget = new Gtk.Box({ spacing: 4, halign: Gtk.Align.CENTER });
 
             this.hourSpinButton = new Gtk.SpinButton({
                 adjustment: hourSpinAdustment,
@@ -113,7 +113,7 @@ var SwitchTimeWidget = GObject.registerClass(
                 max_width_chars: 2,
                 orientation: Gtk.Orientation.VERTICAL
             });
-           
+
             this.timeWidget.pack_start(this.hourSpinButton, false, false, 0);
             this.timeWidget.pack_start(timeColonLabel, false, false, 0);
             this.timeWidget.pack_start(this.minuteSpinButton, false, false, 0);
