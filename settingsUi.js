@@ -103,14 +103,20 @@ var SwitchTimeWidget = GObject.registerClass(
             this.hourSpinButton = new Gtk.SpinButton({
                 adjustment: hourSpinAdustment,
                 wrap: true,
+                width_chars: 2,
                 max_width_chars: 2,
+                snap_to_ticks: true,
+                numeric: true,
                 orientation: Gtk.Orientation.VERTICAL
             });
 
             this.minuteSpinButton = new Gtk.SpinButton({
                 adjustment: minuteSpinAdustment,
                 wrap: true,
+                width_chars: 2,
                 max_width_chars: 2,
+                snap_to_ticks: true,
+                numeric: true,
                 orientation: Gtk.Orientation.VERTICAL
             });
 
