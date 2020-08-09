@@ -14,5 +14,17 @@
       <description>Wallpaper to set at Night time</description>
     </key>
 
+    <key name="day-wallpaper-switch-time" type="d">
+      <default>7.00</default>
+      <summary>Day wallpaper switch time</summary>
+      <description>Time at which the day wallpaper is set</description>
+    </key>
+
+    <key name="night-wallpaper-switch-time" type="d">
+      <default>19.00</default>
+      <summary>Night wallpaper switch time</summary>
+      <description>Time at which the night wallpaper is set</description>
+    </key>
+
   </schema>
 </schemalist>
