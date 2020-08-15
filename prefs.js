@@ -8,20 +8,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
 
-function getSettings() {
-    let gschema = Gio.SettingsSchemaSource.new_from_directory(
-        Me.dir.get_child('schemas').get_path(),
-        Gio.SettingsSchemaSource.get_default(),
-        false
-    );
-
-    let settings = new Gio.Settings({
-        settings_schema: gschema.lookup('org.gnome.shell.extensions.day-night-wallpaper', true)
-    });
-
-    return settings;
-}
-
 const DayNightWallpaperPrefsWidget = GObject.registerClass(
     class DayNightWallpaperPrefsWidget extends Gtk.Box {
         _init(settings) {
@@ -71,7 +57,7 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
 
 function init() {
     const Utils = Me.imports.utils;
-    let settings = getSettings();
+    let settings = ExtensionUtils.getSettings();
 
     if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
         Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
@@ -83,7 +69,7 @@ function init() {
 }
 
 function buildPrefsWidget() {
-    let settings = getSettings();
+    let settings = ExtensionUtils.getSettings();
     let prefsWidget = new DayNightWallpaperPrefsWidget(settings);
     prefsWidget.show_all();
 

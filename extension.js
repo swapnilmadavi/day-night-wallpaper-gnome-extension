@@ -10,20 +10,6 @@ const Mainloop = imports.mainloop;
 
 let timeout;
 
-function getSettings() {
-    let gschema = Gio.SettingsSchemaSource.new_from_directory(
-        Me.dir.get_child('schemas').get_path(),
-        Gio.SettingsSchemaSource.get_default(),
-        false
-    );
-
-    let settings = new Gio.Settings({
-        settings_schema: gschema.lookup('org.gnome.shell.extensions.day-night-wallpaper', true)
-    });
-
-    return settings;
-}
-
 function setDesktopBackground(uri) {
     const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
     // let previousBackgroundUri = gnomeSettings.get_string('picture-uri');
@@ -32,7 +18,7 @@ function setDesktopBackground(uri) {
 }
 
 function onDayWallpaperTimeout() {
-    const settings = getSettings();
+    const settings = ExtensionUtils.getSettings();
     const uri = settings.get_string('day-wallpaper');
     setDesktopBackground(uri);
     timeout = Mainloop.timeout_add_seconds(5, onNightWallpaperTimeout);
@@ -40,7 +26,7 @@ function onDayWallpaperTimeout() {
 }
 
 function onNightWallpaperTimeout() {
-    const settings = getSettings();
+    const settings = ExtensionUtils.getSettings();
     const uri = settings.get_string('night-wallpaper');
     setDesktopBackground(uri);
     timeout = Mainloop.timeout_add_seconds(5, onDayWallpaperTimeout);
@@ -51,7 +37,7 @@ function init() {
     log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
 
     const Utils = Me.imports.utils;
-    let settings = getSettings();
+    let settings = ExtensionUtils.getSettings();
 
     if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
         Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
