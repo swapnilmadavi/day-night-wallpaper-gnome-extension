@@ -55,9 +55,17 @@ function constructSwitchDateTime(switchHour, switchMinute, now) {
     return switchDateTime;
 }
 
-function calculateSecondsForNextSwitch(switchHour, switchMinute) {
-    log(`calculating seconds for ${switchHour}:${switchMinute}`);
+function getMinuteFromSwitchTime(switchTime, switchHour) {
+    let decimal = switchTime - switchHour;
+    decimal = parseFloat(decimal.toFixed(2));
+    return Math.round(decimal * 60);
+}
+
+function calculateSecondsForNextSwitch(switchTime) {
+    let switchHour = parseInt(switchTime);
+    let switchMinute = getMinuteFromSwitchTime(switchTime, switchHour)
     let now = GLib.DateTime.new_now_local();
+    log(`calculating seconds for ${switchHour}:${switchMinute}`);
     let switchDateTime = constructSwitchDateTime(switchHour, switchMinute, now);
     return switchDateTime.to_unix() - now.to_unix();
 }
@@ -67,7 +75,7 @@ function onDayWallpaperTimeout() {
     const uri = settings.get_string('day-wallpaper');
     setDesktopBackground(uri);
     // const nightWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(22, 5);
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(23.83);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onNightWallpaperTimeout);
     return false;
@@ -78,7 +86,7 @@ function onNightWallpaperTimeout() {
     const uri = settings.get_string('night-wallpaper');
     setDesktopBackground(uri);
     // const nightWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(22, 0);
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(0.0);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onDayWallpaperTimeout);
     return false
@@ -101,7 +109,7 @@ function init() {
 
 function enable() {
     log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
-    let secondsLeftForNextSwitch = calculateSecondsForNextSwitch(21, 55);
+    let secondsLeftForNextSwitch = calculateSecondsForNextSwitch(23.83);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onNightWallpaperTimeout);
 }
