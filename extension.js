@@ -61,12 +61,17 @@ function getMinuteFromSwitchTime(switchTime, switchHour) {
     return Math.round(decimal * 60);
 }
 
-function calculateSecondsForNextSwitch(switchTime) {
+function getSwitchDateTime(switchTime, now) {
     let switchHour = parseInt(switchTime);
     let switchMinute = getMinuteFromSwitchTime(switchTime, switchHour)
+
+    return constructSwitchDateTime(switchHour, switchMinute, now);
+}
+
+function calculateSecondsForNextSwitch(switchTime) {
     let now = GLib.DateTime.new_now_local();
-    log(`calculating seconds for ${switchHour}:${switchMinute}`);
-    let switchDateTime = constructSwitchDateTime(switchHour, switchMinute, now);
+    // let switchDateTime = constructSwitchDateTime(switchHour, switchMinute, now);
+    let switchDateTime = getSwitchDateTime(switchTime, now);
     return switchDateTime.to_unix() - now.to_unix();
 }
 
@@ -75,7 +80,7 @@ function onDayWallpaperTimeout() {
     const uri = settings.get_string('day-wallpaper');
     setDesktopBackground(uri);
     // const nightWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(23.83);
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(21.0);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onNightWallpaperTimeout);
     return false;
@@ -85,8 +90,8 @@ function onNightWallpaperTimeout() {
     const settings = ExtensionUtils.getSettings();
     const uri = settings.get_string('night-wallpaper');
     setDesktopBackground(uri);
-    // const nightWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(0.0);
+    // const dayWallpaperSwitchTime = 20.08
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(22.0);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onDayWallpaperTimeout);
     return false
@@ -109,9 +114,30 @@ function init() {
 
 function enable() {
     log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
-    let secondsLeftForNextSwitch = calculateSecondsForNextSwitch(23.83);
-    log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
-    timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onNightWallpaperTimeout);
+
+    let daySwitchTime = 22.0;
+    let nightSwitchTime = 21.0;
+
+    let now = GLib.DateTime.new_now_local();
+    let daySwitchDateTime = getSwitchDateTime(daySwitchTime, now);
+    let nigthSwitchDateTime = getSwitchDateTime(nightSwitchTime, now);
+
+    log(`daySwitchDateTime => ${daySwitchDateTime.format_iso8601()}`);
+    log(`now => ${now.format_iso8601()}`);
+
+    if (GLib.DateTime.compare(now, daySwitchDateTime) >= 0) {
+        // Schedule night wallpaper switch
+        log('Scheduling switch for night wallpaper');
+        let secondsLeftForNextSwitch = nigthSwitchDateTime.to_unix() - now.to_unix();
+        log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
+        timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onNightWallpaperTimeout);
+    } else {
+        // Schedule day wallpaper switch
+        log('Scheduling switch for day wallpaper');
+        let secondsLeftForNextSwitch = daySwitchDateTime.to_unix() - now.to_unix();
+        log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
+        timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onDayWallpaperTimeout);
+    }
 }
 
 function disable() {
