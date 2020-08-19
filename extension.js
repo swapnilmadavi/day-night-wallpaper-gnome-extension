@@ -18,6 +18,22 @@ function setDesktopBackground(uri) {
     // gsettings.set_string('picture-options', 'zoom');
 }
 
+/**
+ * Constructs GLib.DateTime object for the next switch with respect to the 
+ * current i.e. now DateTime instance.
+ * 
+ * If the current time has already crossed the passed switch time
+ * then the resultant DateTime will be of the next day.
+ * Example:- 
+ * Switch time => 09:00 Hrs
+ * Now => 19 Aug 2020 11:30 Hrs
+ * Result => 20 Aug 2020 09:00 Hrs
+ * 
+ * @param {Number} switchHour 
+ * @param {Number} switchMinute 
+ * @param {GLib.DateTime} now 
+ * @returns {GLib.DateTime} Switch DateTime object
+ */
 function constructSwitchDateTime(switchHour, switchMinute, now) {
     let switchDateTime = GLib.DateTime.new(
         now.get_timezone(),
@@ -30,22 +46,24 @@ function constructSwitchDateTime(switchHour, switchMinute, now) {
     );
 
     /**
-     * Adjust the day component for weird switch time.
+     * Adjust the day component for switch time.
      * Example 1:- 
-     * Day switch time => 09:00 Hrs
-     * Night switch time => 07:30 Hrs
+     * Switch time => 09:00 Hrs
+     * Now => 19 Aug 2020 09:30 Hrs
+     * Result => 20 Aug 2020 09:00 Hrs
      * 
      * Example 2:-
-     * Day switch time => 09:30 Hrs
-     * Night switch time => 09:00 Hrs
+     * Switch time => 07:00 Hrs
+     * Now => 19 Aug 2020 09:30 Hrs
+     * Result => 20 Aug 2020 07:00 Hrs
      * */
     let nowHour = now.get_hour();
-    if (switchHour == nowHour) { // Example 2
+    if (switchHour == nowHour) { // Example 1
         let nowMinute = now.get_minute();
         if (switchMinute < nowMinute) {
             switchDateTime = switchDateTime.add_days(1);
         }
-    } else if (switchHour < nowHour) { // Example 1
+    } else if (switchHour < nowHour) { // Example 2
         switchDateTime = switchDateTime.add_days(1);
     }
 
@@ -61,18 +79,17 @@ function getMinuteFromSwitchTime(switchTime, switchHour) {
     return Math.round(decimal * 60);
 }
 
-function getSwitchDateTime(switchTime, now) {
+function convertSwitchTimeToUnixTimestamp(switchTime, now) {
     let switchHour = parseInt(switchTime);
     let switchMinute = getMinuteFromSwitchTime(switchTime, switchHour)
 
-    return constructSwitchDateTime(switchHour, switchMinute, now);
+    return constructSwitchDateTime(switchHour, switchMinute, now).to_unix();
 }
 
 function calculateSecondsForNextSwitch(switchTime) {
     let now = GLib.DateTime.new_now_local();
-    // let switchDateTime = constructSwitchDateTime(switchHour, switchMinute, now);
-    let switchDateTime = getSwitchDateTime(switchTime, now);
-    return switchDateTime.to_unix() - now.to_unix();
+    let switchTimeAsUnixTimestamp = convertSwitchTimeToUnixTimestamp(switchTime, now);
+    return switchTimeAsUnixTimestamp - now.to_unix();
 }
 
 function onDayWallpaperTimeout() {
@@ -80,7 +97,7 @@ function onDayWallpaperTimeout() {
     const uri = settings.get_string('day-wallpaper');
     setDesktopBackground(uri);
     // const nightWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(21.0);
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(9.5);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onNightWallpaperTimeout);
     return false;
@@ -91,7 +108,7 @@ function onNightWallpaperTimeout() {
     const uri = settings.get_string('night-wallpaper');
     setDesktopBackground(uri);
     // const dayWallpaperSwitchTime = 20.08
-    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(22.0);
+    const secondsLeftForNextSwitch = calculateSecondsForNextSwitch(9.33);
     log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
     timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, onDayWallpaperTimeout);
     return false
@@ -115,28 +132,25 @@ function init() {
 function enable() {
     log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
 
-    let daySwitchTime = 22.0;
-    let nightSwitchTime = 21.0;
+    let daySwitchTime = 9.33;
+    let nightSwitchTime = 9.5;
 
     let now = GLib.DateTime.new_now_local();
-    let daySwitchDateTime = getSwitchDateTime(daySwitchTime, now);
-    let nigthSwitchDateTime = getSwitchDateTime(nightSwitchTime, now);
+    let daySwitchUnixTimestamp = convertSwitchTimeToUnixTimestamp(daySwitchTime, now);
+    let nigthSwitchUnixTimestamp = convertSwitchTimeToUnixTimestamp(nightSwitchTime, now);
 
-    log(`daySwitchDateTime => ${daySwitchDateTime.format_iso8601()}`);
-    log(`now => ${now.format_iso8601()}`);
-
-    if (GLib.DateTime.compare(now, daySwitchDateTime) >= 0) {
-        // Schedule night wallpaper switch
-        log('Scheduling switch for night wallpaper');
-        let secondsLeftForNextSwitch = nigthSwitchDateTime.to_unix() - now.to_unix();
-        log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
-        timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onNightWallpaperTimeout);
-    } else {
+    if (daySwitchUnixTimestamp < nigthSwitchUnixTimestamp) { // Day Switch Timestamp is nearest to now
         // Schedule day wallpaper switch
         log('Scheduling switch for day wallpaper');
-        let secondsLeftForNextSwitch = daySwitchDateTime.to_unix() - now.to_unix();
-        log(`secondsLeftForNextSwitch => ${secondsLeftForNextSwitch}`);
-        timeout = Mainloop.timeout_add_seconds(secondsLeftForNextSwitch, this.onDayWallpaperTimeout);
+        let secondsLeftForDayWallpaperSwitch = daySwitchUnixTimestamp - now.to_unix();
+        log(`secondsLeftForDayWallpaperSwitch => ${secondsLeftForDayWallpaperSwitch}`);
+        timeout = Mainloop.timeout_add_seconds(secondsLeftForDayWallpaperSwitch, this.onDayWallpaperTimeout);
+    } else if (nigthSwitchUnixTimestamp < daySwitchUnixTimestamp) { // Night Switch Timestamp is nearest to now
+        // Schedule night wallpaper switch
+        log('Scheduling switch for night wallpaper');
+        let secondsLeftForNightWallpaperSwitch = nigthSwitchUnixTimestamp - now.to_unix();
+        log(`secondsLeftForNightWallpaperSwitch => ${secondsLeftForNightWallpaperSwitch}`);
+        timeout = Mainloop.timeout_add_seconds(secondsLeftForNightWallpaperSwitch, this.onNightWallpaperTimeout);
     }
 }
 
