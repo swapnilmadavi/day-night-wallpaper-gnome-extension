@@ -132,8 +132,10 @@ function init() {
 function enable() {
     log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
 
-    let daySwitchTime = 9.33;
-    let nightSwitchTime = 9.5;
+    let settings = ExtensionUtils.getSettings();
+
+    let daySwitchTime = settings.get_double('day-wallpaper-switch-time');
+    let nightSwitchTime = settings.get_double('night-wallpaper-switch-time');
 
     let now = GLib.DateTime.new_now_local();
     let daySwitchUnixTimestamp = convertSwitchTimeToUnixTimestamp(daySwitchTime, now);
