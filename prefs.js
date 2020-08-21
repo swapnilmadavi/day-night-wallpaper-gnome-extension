@@ -41,7 +41,7 @@ const DayNightWallpaperPrefsWidget = GObject.registerClass(
 
             // Switch Times section
             const switchTimesSectionLabel = new Gtk.Label({
-                label: '<b>Switch Times</b>',
+                label: '<b>Switch Times (24-hour)</b>',
                 halign: Gtk.Align.START,
                 use_markup: true
             });
