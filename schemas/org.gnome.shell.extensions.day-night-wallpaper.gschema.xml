@@ -21,7 +21,7 @@
     </key>
 
     <key name="night-wallpaper-switch-time" type="d">
-      <default>21.00</default>
+      <default>22.75</default>
       <summary>Night wallpaper switch time</summary>
       <description>Time at which the night wallpaper is set</description>
     </key>
