@@ -86,6 +86,14 @@ var SwitchTimesSection = GObject.registerClass(
             this.pack_start(this.daySwitchTimeWidget, true, true, 0);
             this.pack_start(this.nightSwitchTimeWidget, true, true, 0);
         }
+
+        setDayWallpaperSwitchTime(switchHour, switchMinute) {
+            this.daySwitchTimeWidget.setSwitchTime(switchHour, switchMinute);
+        }
+
+        setNightWallpaperSwitchTime(switchHour, switchMinute) {
+            this.nightSwitchTimeWidget.setSwitchTime(switchHour, switchMinute);
+        }
     }
 );
 
@@ -142,6 +150,11 @@ var SwitchTimeWidget = GObject.registerClass(
 
             this.pack_start(this.timeWidget, true, true, 0);
             this.pack_start(switchTimeLabel, true, true, 0);
+        }
+
+        setSwitchTime(switchHour, switchMinute) {
+            this.hourSpinButton.set_value(switchHour);
+            this.minuteSpinButton.set_value(switchMinute);
         }
     }
 );
