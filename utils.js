@@ -27,7 +27,13 @@ var SwitchTime = class SwitchTime {
       return this._switchMinute;
     }
 
-    static fromSettings(switchTimeFromSettings) {
+    toSettingsFormat() {
+        let decimal = this._switchMinute / 60;
+        decimal = parseFloat(decimal.toFixed(2));
+        return this._switchHour + decimal;
+    }
+
+    static newFromSettings(switchTimeFromSettings) {
         let switchHour = parseInt(switchTimeFromSettings);
       	let decimal = switchTimeFromSettings - switchHour;
         decimal = parseFloat(decimal.toFixed(2));
