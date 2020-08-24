@@ -13,11 +13,14 @@ let dayNigthWallpaperExtension;
 const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     constructor(settings) {
         this.settings = settings;
-        this._scheduledTimeout = undefined;
+        this._scheduledTimeout = null;
     }
 
     start() {
         log('Starting DayNightWallpaperExtension...')
+
+        this._connectSettings();
+
         let daySwitchTime = this.settings.get_double('day-wallpaper-switch-time');
         let nightSwitchTime = this.settings.get_double('night-wallpaper-switch-time');
 
@@ -38,10 +41,13 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
     stop() {
         log('Stopping DayNightWallpaperExtension...')
+
+        this._disconnectSettings();
+
         if (this._scheduledTimeout) {
             Mainloop.source_remove(this._scheduledTimeout);
         }
-        this._scheduledTimeout = undefined;
+        this._scheduledTimeout = null;
     }
 
     _setDesktopBackground(uri) {
@@ -156,6 +162,26 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         log(`secondsLeftForNightWallpaperSwitch => ${secondsLeftForNightWallpaperSwitch}`);
         this._scheduledTimeout = Mainloop.timeout_add_seconds(secondsLeftForNightWallpaperSwitch, this._onNightWallpaperTimeout.bind(this));
     }
+
+    _onDayWallpaperSwitchTimeChanged(settings, key) {
+        log(`_onDayWallpaperSwitchTimeChanged => key = ${key}`);
+    }
+
+    _onNightWallpaperSwitchTimeChanged(settings, key) {
+        log(`_onNightWallpaperSwitchTimeChanged => key = ${key}`);
+    }
+
+    _connectSettings() {
+        log('Connecting settings...');
+        this._onDayWallpaperSwitchTimeChangedId = this.settings.connect('changed::day-wallpaper-switch-time', this._onDayWallpaperSwitchTimeChanged.bind(this));
+        this._onNightWallpaperSwitchTimeChangedId = this.settings.connect('changed::night-wallpaper-switch-time', this._onNightWallpaperSwitchTimeChanged.bind(this));
+    }
+
+    _disconnectSettings() {
+        log('Disconnecting settings...');
+        this.settings.disconnect(this._onDayWallpaperSwitchTimeChangedId);
+        this.settings.disconnect(this._onNightWallpaperSwitchTimeChangedId);
+    }
 }
 
 function init() {
@@ -183,5 +209,5 @@ function enable() {
 function disable() {
     log(`disabling ${Me.metadata.name} version ${Me.metadata.version}`);
     dayNigthWallpaperExtension.stop();
-    dayNigthWallpaperExtension = undefined;
+    dayNigthWallpaperExtension = null;
 }
