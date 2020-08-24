@@ -8,52 +8,63 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
 
-const DayNightWallpaperPrefsWidget = GObject.registerClass(
-    class DayNightWallpaperPrefsWidget extends Gtk.Box {
-        _init(settings) {
-            super._init({
-                margin: 18,
-                spacing: 12,
-                orientation: Gtk.Orientation.VERTICAL
-            })
+// For compatibility checks
+const Config = imports.misc.config;
+const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
 
-            // Wallpapers section
-            const wallpapersSectionLabel = new Gtk.Label({
-                label: '<b>Wallpapers</b>',
-                halign: Gtk.Align.START,
-                use_markup: true
-            });
-            this.wallpapersSection = new SettingsUi.WallpapersSection();
-            this.wallpapersSection.setDayWallpaperUri(settings.get_string('day-wallpaper'));
-            this.wallpapersSection.setNightWallpaperUri(settings.get_string('night-wallpaper'));
+let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gtk.Box {
+    _init(settings) {
+        super._init({
+            margin: 18,
+            spacing: 12,
+            orientation: Gtk.Orientation.VERTICAL
+        })
 
-            this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
-                let wallpaperUri = this.wallpapersSection.getDayWallpaperUri()
-                settings.set_string('day-wallpaper', wallpaperUri);
-            });
-            this.wallpapersSection.nightWallpaperChooserButton.connect('file-set', () => {
-                let wallpaperUri = this.wallpapersSection.getNightWallpaperUri()
-                settings.set_string('night-wallpaper', wallpaperUri);
-            });
+        // Wallpapers section
+        const wallpapersSectionLabel = new Gtk.Label({
+            label: '<b>Wallpapers</b>',
+            halign: Gtk.Align.START,
+            use_markup: true
+        });
+        this.wallpapersSection = new SettingsUi.WallpapersSection();
+        this.wallpapersSection.setDayWallpaperUri(settings.get_string('day-wallpaper'));
+        this.wallpapersSection.setNightWallpaperUri(settings.get_string('night-wallpaper'));
 
-            this.pack_start(wallpapersSectionLabel, false, true, 0);
-            this.pack_start(this.wallpapersSection, false, true, 0);
+        this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
+            let wallpaperUri = this.wallpapersSection.getDayWallpaperUri()
+            settings.set_string('day-wallpaper', wallpaperUri);
+        });
+        this.wallpapersSection.nightWallpaperChooserButton.connect('file-set', () => {
+            let wallpaperUri = this.wallpapersSection.getNightWallpaperUri()
+            settings.set_string('night-wallpaper', wallpaperUri);
+        });
 
-            // Switch Times section
-            const switchTimesSectionLabel = new Gtk.Label({
-                label: '<b>Switch Times (24-hour)</b>',
-                halign: Gtk.Align.START,
-                use_markup: true
-            });
-            this.switchTimesSection = new SettingsUi.SwitchTimesSection();
-            this.pack_start(switchTimesSectionLabel, false, true, 0);
-            this.pack_start(this.switchTimesSection, false, true, 0);
-        }
+        this.pack_start(wallpapersSectionLabel, false, true, 0);
+        this.pack_start(this.wallpapersSection, false, true, 0);
 
-        _getACookie() {
-            this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.set_value(3);
-        }
-    });
+        // Switch Times section
+        const switchTimesSectionLabel = new Gtk.Label({
+            label: '<b>Switch Times (24-hour)</b>',
+            halign: Gtk.Align.START,
+            use_markup: true
+        });
+        this.switchTimesSection = new SettingsUi.SwitchTimesSection();
+        this.pack_start(switchTimesSectionLabel, false, true, 0);
+        this.pack_start(this.switchTimesSection, false, true, 0);
+    }
+
+    _getACookie() {
+        this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.set_value(3);
+    }
+}
+
+// Compatibility with gnome-shell >= 3.32
+if (SHELL_MINOR > 30) {
+    DayNightWallpaperPrefsWidget = GObject.registerClass(
+        { GTypeName: 'DayNightWallpaperPrefsWidget' },
+        DayNightWallpaperPrefsWidget
+    );
+}
 
 function init() {
     const Utils = Me.imports.utils;
