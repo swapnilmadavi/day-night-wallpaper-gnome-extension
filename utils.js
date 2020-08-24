@@ -12,3 +12,26 @@ function fallbackToSystemWallpaper(extensionSettings, wallpaperKey) {
     let systemBackgroundUri = gnomeSettings.get_string('picture-uri');
     extensionSettings.set_string(wallpaperKey, systemBackgroundUri);
 }
+
+var SwitchTime = class SwitchTime {
+    constructor(switchHour, switchMinute) {
+        this._switchHour = switchHour;
+        this._switchMinute = switchMinute;
+    }
+  
+  	get switchHour() {
+      return this._switchHour;
+    }
+  
+  	get switchMinute() {
+      return this._switchMinute;
+    }
+
+    static fromSettings(switchTimeFromSettings) {
+        let switchHour = parseInt(switchTimeFromSettings);
+      	let decimal = switchTimeFromSettings - switchHour;
+        decimal = parseFloat(decimal.toFixed(2));
+        let switchMinute = Math.round(decimal * 60);
+        return new SwitchTime(switchHour, switchMinute);
+    }
+}
