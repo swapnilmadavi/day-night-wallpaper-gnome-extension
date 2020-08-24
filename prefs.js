@@ -7,6 +7,7 @@ const { Gio, GObject, Gtk } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
+const Utils = Me.imports.utils;
 
 // For compatibility checks
 const Config = imports.misc.config;
@@ -49,12 +50,25 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
             use_markup: true
         });
         this.switchTimesSection = new SettingsUi.SwitchTimesSection();
+        this._readDayWallpaperSwitchTime(settings.get_double('day-wallpaper-switch-time'));
+        this._readNightWallpaperSwitchTime(settings.get_double('night-wallpaper-switch-time'));
+
         this.pack_start(switchTimesSectionLabel, false, true, 0);
         this.pack_start(this.switchTimesSection, false, true, 0);
     }
 
     _getACookie() {
         this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.set_value(3);
+    }
+
+    _readDayWallpaperSwitchTime(dayWallpaperSwitchTimeFromSettings) {
+        let dayWallpaperSwitchTime = Utils.SwitchTime.fromSettings(dayWallpaperSwitchTimeFromSettings);
+        this.switchTimesSection.setDayWallpaperSwitchTime(dayWallpaperSwitchTime.switchHour, dayWallpaperSwitchTime.switchMinute);
+    }
+
+    _readNightWallpaperSwitchTime(nightWallpaperSwitchTimeFromSettings) {
+        let nightWallpaperSwitchTime = Utils.SwitchTime.fromSettings(nightWallpaperSwitchTimeFromSettings);
+        this.switchTimesSection.setNightWallpaperSwitchTime(nightWallpaperSwitchTime.switchHour, nightWallpaperSwitchTime.switchMinute);
     }
 }
 
@@ -67,7 +81,6 @@ if (SHELL_MINOR > 30) {
 }
 
 function init() {
-    const Utils = Me.imports.utils;
     let settings = ExtensionUtils.getSettings();
 
     if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
