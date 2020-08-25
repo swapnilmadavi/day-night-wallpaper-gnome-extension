@@ -7,13 +7,14 @@ const { Gio, GLib } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Mainloop = imports.mainloop;
+const Utils = Me.imports.utils;
 
 let dayNigthWallpaperExtension;
 
 const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     constructor(settings) {
         this.settings = settings;
-        this._scheduledTimeout = null;
+        this._scheduledTimeoutId = null;
     }
 
     start() {
@@ -21,21 +22,11 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
         this._connectSettings();
 
-        let daySwitchTime = this.settings.get_double('day-wallpaper-switch-time');
-        let nightSwitchTime = this.settings.get_double('night-wallpaper-switch-time');
-
-        let now = GLib.DateTime.new_now_local();
-        let daySwitchUnixTimestamp = this._convertSwitchTimeToUnixTimestamp(daySwitchTime, now);
-        let nigthSwitchUnixTimestamp = this._convertSwitchTimeToUnixTimestamp(nightSwitchTime, now);
-
-        if (daySwitchUnixTimestamp < nigthSwitchUnixTimestamp) { // Day Switch Timestamp is nearest to now
-            // Schedule day wallpaper switch
-            let secondsLeftForDayWallpaperSwitch = daySwitchUnixTimestamp - now.to_unix();
-            this._scheduleDayWallpaperSwitch(secondsLeftForDayWallpaperSwitch);
-        } else if (nigthSwitchUnixTimestamp < daySwitchUnixTimestamp) { // Night Switch Timestamp is nearest to now
-            // Schedule night wallpaper switch
-            let secondsLeftForNightWallpaperSwitch = nigthSwitchUnixTimestamp - now.to_unix();
-            this._scheduleNightWallpaperSwitch(secondsLeftForNightWallpaperSwitch);
+        let nextWallpaperSwitch = this._decideNextWallpaperSwitch();
+        if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
+            this._scheduleDayWallpaperSwitch(nextWallpaperSwitch.secondsToSwitch);
+        } else {
+            this._scheduleNightWallpaperSwitch(nextWallpaperSwitch.secondsToSwitch);
         }
     }
 
@@ -44,10 +35,10 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
         this._disconnectSettings();
 
-        if (this._scheduledTimeout) {
-            Mainloop.source_remove(this._scheduledTimeout);
+        if (this._scheduledTimeoutId) {
+            Mainloop.source_remove(this._scheduledTimeoutId);
         }
-        this._scheduledTimeout = null;
+        this._scheduledTimeoutId = null;
     }
 
     _setDesktopBackground(uri) {
@@ -95,11 +86,16 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
          * Switch time => 07:00 Hrs
          * Now => 19 Aug 2020 09:30 Hrs
          * Result => 20 Aug 2020 07:00 Hrs
+         * 
+         * Example 3:-
+         * Switch time => 09:00 Hrs
+         * Now => 19 Aug 2020 09:00 Hrs
+         * Result => 20 Aug 2020 09:00 Hrs
          * */
         let nowHour = now.get_hour();
-        if (switchHour == nowHour) { // Example 1
+        if (switchHour == nowHour) { // Example 1 & 3
             let nowMinute = now.get_minute();
-            if (switchMinute < nowMinute) {
+            if (switchMinute <= nowMinute) {
                 switchDateTime = switchDateTime.add_days(1);
             }
         } else if (switchHour < nowHour) { // Example 2
@@ -148,7 +144,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
             secondsLeftForDayWallpaperSwitch = daySwitchUnixTimestamp - now.to_unix();
         }
         log(`secondsLeftForDayWallpaperSwitch => ${secondsLeftForDayWallpaperSwitch}`);
-        this._scheduledTimeout = Mainloop.timeout_add_seconds(secondsLeftForDayWallpaperSwitch, this._onDayWallpaperTimeout.bind(this));
+        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(secondsLeftForDayWallpaperSwitch, this._onDayWallpaperTimeout.bind(this));
     }
 
     _scheduleNightWallpaperSwitch(secondsLeftForNightWallpaperSwitch) {
@@ -160,21 +156,50 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
             secondsLeftForNightWallpaperSwitch = nigthSwitchUnixTimestamp - now.to_unix();
         }
         log(`secondsLeftForNightWallpaperSwitch => ${secondsLeftForNightWallpaperSwitch}`);
-        this._scheduledTimeout = Mainloop.timeout_add_seconds(secondsLeftForNightWallpaperSwitch, this._onNightWallpaperTimeout.bind(this));
+        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(secondsLeftForNightWallpaperSwitch, this._onNightWallpaperTimeout.bind(this));
     }
 
-    _onDayWallpaperSwitchTimeChanged(settings, key) {
-        log(`_onDayWallpaperSwitchTimeChanged => key = ${key}`);
+    _onWallpaperSwitchTimeChanged(settings, key) {
+        if (this._scheduledTimeoutId) {
+            Mainloop.source_remove(this._scheduledTimeoutId);
+        }
+
+        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(2, () => {
+            let nextWallpaperSwitch = this._decideNextWallpaperSwitch();
+            if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
+                this._scheduleDayWallpaperSwitch(nextWallpaperSwitch.secondsToSwitch);
+            } else {
+                this._scheduleNightWallpaperSwitch(nextWallpaperSwitch.secondsToSwitch);
+            }
+        });
     }
 
-    _onNightWallpaperSwitchTimeChanged(settings, key) {
-        log(`_onNightWallpaperSwitchTimeChanged => key = ${key}`);
+    _decideNextWallpaperSwitch() {
+        let daySwitchTime = this.settings.get_double('day-wallpaper-switch-time');
+        let nightSwitchTime = this.settings.get_double('night-wallpaper-switch-time');
+
+        let now = GLib.DateTime.new_now_local();
+        let daySwitchUnixTimestamp = this._convertSwitchTimeToUnixTimestamp(daySwitchTime, now);
+        let nigthSwitchUnixTimestamp = this._convertSwitchTimeToUnixTimestamp(nightSwitchTime, now);
+
+        // Nearest switch time is scheduled first.
+        // If both Day & Night wallpaper switch times are same then
+        // day wallpaper is scheduled first.
+        if (daySwitchUnixTimestamp <= nigthSwitchUnixTimestamp) {
+            // Schedule day wallpaper switch
+            let secondsLeftForDayWallpaperSwitch = daySwitchUnixTimestamp - now.to_unix();
+            return new Utils.NextWallpaperSwitch(Utils.switchType.DAY, secondsLeftForDayWallpaperSwitch);
+        } else {
+            // Schedule night wallpaper switch
+            let secondsLeftForNightWallpaperSwitch = nigthSwitchUnixTimestamp - now.to_unix();
+            return new Utils.NextWallpaperSwitch(Utils.switchType.NIGHT, secondsLeftForNightWallpaperSwitch);
+        }
     }
 
     _connectSettings() {
         log('Connecting settings...');
-        this._onDayWallpaperSwitchTimeChangedId = this.settings.connect('changed::day-wallpaper-switch-time', this._onDayWallpaperSwitchTimeChanged.bind(this));
-        this._onNightWallpaperSwitchTimeChangedId = this.settings.connect('changed::night-wallpaper-switch-time', this._onNightWallpaperSwitchTimeChanged.bind(this));
+        this._onDayWallpaperSwitchTimeChangedId = this.settings.connect('changed::day-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
+        this._onNightWallpaperSwitchTimeChangedId = this.settings.connect('changed::night-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
     }
 
     _disconnectSettings() {
@@ -187,7 +212,6 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 function init() {
     log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
 
-    const Utils = Me.imports.utils;
     let settings = ExtensionUtils.getSettings();
 
     if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {

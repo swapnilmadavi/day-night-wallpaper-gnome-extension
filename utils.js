@@ -2,6 +2,11 @@
 
 'use strict';
 
+var switchType = {
+    DAY: 1,
+    NIGHT: 2
+}
+
 function isWallpaperSet(extensionSettings, wallpaperKey) {
     return extensionSettings.get_string(wallpaperKey) != '';
 }
@@ -18,13 +23,13 @@ var SwitchTime = class SwitchTime {
         this._switchHour = switchHour;
         this._switchMinute = switchMinute;
     }
-  
-  	get switchHour() {
-      return this._switchHour;
+
+    get switchHour() {
+        return this._switchHour;
     }
-  
-  	get switchMinute() {
-      return this._switchMinute;
+
+    get switchMinute() {
+        return this._switchMinute;
     }
 
     toSettingsFormat() {
@@ -35,9 +40,24 @@ var SwitchTime = class SwitchTime {
 
     static newFromSettings(switchTimeFromSettings) {
         let switchHour = parseInt(switchTimeFromSettings);
-      	let decimal = switchTimeFromSettings - switchHour;
+        let decimal = switchTimeFromSettings - switchHour;
         decimal = parseFloat(decimal.toFixed(2));
         let switchMinute = Math.round(decimal * 60);
         return new SwitchTime(switchHour, switchMinute);
+    }
+}
+
+var NextWallpaperSwitch = class NextWallpaperSwitch {
+    constructor(type, secondsToSwitch) {
+        this._type = type;
+        this._secondsToSwitch = secondsToSwitch;
+    }
+
+    get type() {
+        return this._type;
+    }
+
+    get secondsToSwitch() {
+        return this._secondsToSwitch;
     }
 }
