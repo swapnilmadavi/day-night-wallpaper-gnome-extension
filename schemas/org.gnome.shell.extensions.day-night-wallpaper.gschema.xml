@@ -15,13 +15,13 @@
     </key>
 
     <key name="day-wallpaper-switch-time" type="d">
-      <default>10.00</default>
+      <default>9.00</default>
       <summary>Day wallpaper switch time</summary>
       <description>Time at which the day wallpaper is set</description>
     </key>
 
     <key name="night-wallpaper-switch-time" type="d">
-      <default>22.75</default>
+      <default>19.00</default>
       <summary>Night wallpaper switch time</summary>
       <description>Time at which the night wallpaper is set</description>
     </key>
