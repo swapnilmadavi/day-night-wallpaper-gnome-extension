@@ -48,16 +48,16 @@ var SwitchTime = class SwitchTime {
 }
 
 var NextWallpaperSwitch = class NextWallpaperSwitch {
-    constructor(type, secondsToSwitch) {
+    constructor(type, secondsLeftForSwitch) {
         this._type = type;
-        this._secondsToSwitch = secondsToSwitch;
+        this._secondsLeftForSwitch = secondsLeftForSwitch;
     }
 
     get type() {
         return this._type;
     }
 
-    get secondsToSwitch() {
-        return this._secondsToSwitch;
+    get secondsLeftForSwitch() {
+        return this._secondsLeftForSwitch;
     }
 }
