@@ -35,11 +35,11 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
         this.wallpapersSection.setNightWallpaperUri(settings.get_string('night-wallpaper'));
 
         this.wallpapersSection.dayWallpaperChooserButton.connect('file-set', () => {
-            let wallpaperUri = this.wallpapersSection.getDayWallpaperUri()
+            const wallpaperUri = this.wallpapersSection.getDayWallpaperUri()
             this._settings.set_string('day-wallpaper', wallpaperUri);
         });
         this.wallpapersSection.nightWallpaperChooserButton.connect('file-set', () => {
-            let wallpaperUri = this.wallpapersSection.getNightWallpaperUri()
+            const wallpaperUri = this.wallpapersSection.getNightWallpaperUri()
             this._settings.set_string('night-wallpaper', wallpaperUri);
         });
 
@@ -68,26 +68,26 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
     }
 
     _readDayWallpaperSwitchTime(dayWallpaperSwitchTimeFromSettings) {
-        let dayWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(dayWallpaperSwitchTimeFromSettings);
+        const dayWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(dayWallpaperSwitchTimeFromSettings);
         this.switchTimesSection.setDayWallpaperSwitchTime(dayWallpaperSwitchTime.switchHour, dayWallpaperSwitchTime.switchMinute);
     }
 
     _readNightWallpaperSwitchTime(nightWallpaperSwitchTimeFromSettings) {
-        let nightWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(nightWallpaperSwitchTimeFromSettings);
+        const nightWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(nightWallpaperSwitchTimeFromSettings);
         this.switchTimesSection.setNightWallpaperSwitchTime(nightWallpaperSwitchTime.switchHour, nightWallpaperSwitchTime.switchMinute);
     }
 
     _onDayWallpaperSwitchTimeChanged(spinButton) {
-        let daySwitchHour = this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.get_value_as_int();
-        let daySwitchMinute = this.switchTimesSection.daySwitchTimeWidget.minuteSpinButton.get_value_as_int();
-        let daySwitchTime = new Utils.SwitchTime(daySwitchHour, daySwitchMinute);
+        const daySwitchHour = this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.get_value_as_int();
+        const daySwitchMinute = this.switchTimesSection.daySwitchTimeWidget.minuteSpinButton.get_value_as_int();
+        const daySwitchTime = new Utils.SwitchTime(daySwitchHour, daySwitchMinute);
         this._settings.set_double('day-wallpaper-switch-time', daySwitchTime.toSettingsFormat());
     }
 
     _onNightWallpaperSwitchTimeChanged(spinButton) {
-        let nightSwitchHour = this.switchTimesSection.nightSwitchTimeWidget.hourSpinButton.get_value_as_int();
-        let nightSwitchMinute = this.switchTimesSection.nightSwitchTimeWidget.minuteSpinButton.get_value_as_int();
-        let nightSwitchTime = new Utils.SwitchTime(nightSwitchHour, nightSwitchMinute);
+        const nightSwitchHour = this.switchTimesSection.nightSwitchTimeWidget.hourSpinButton.get_value_as_int();
+        const nightSwitchMinute = this.switchTimesSection.nightSwitchTimeWidget.minuteSpinButton.get_value_as_int();
+        const nightSwitchTime = new Utils.SwitchTime(nightSwitchHour, nightSwitchMinute);
         this._settings.set_double('night-wallpaper-switch-time', nightSwitchTime.toSettingsFormat());
     }
 }
@@ -101,7 +101,7 @@ if (SHELL_MINOR > 30) {
 }
 
 function init() {
-    let settings = ExtensionUtils.getSettings();
+    const settings = ExtensionUtils.getSettings();
 
     if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
         Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
@@ -113,8 +113,8 @@ function init() {
 }
 
 function buildPrefsWidget() {
-    let settings = ExtensionUtils.getSettings();
-    let prefsWidget = new DayNightWallpaperPrefsWidget(settings);
+    const settings = ExtensionUtils.getSettings();
+    const prefsWidget = new DayNightWallpaperPrefsWidget(settings);
     prefsWidget.show_all();
 
     return prefsWidget;

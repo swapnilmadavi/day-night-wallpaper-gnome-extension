@@ -154,7 +154,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     }
 
     _scheduleDayWallpaperSwitch(secondsLeftForDayWallpaperSwitch) {
-        log('Scheduling switch for day wallpaper');
+        log('Scheduling switch for day wallpaper...');
         if (secondsLeftForDayWallpaperSwitch == undefined) {
             const daySwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('day-wallpaper-switch-time'));
             const now = GLib.DateTime.new_now_local();
@@ -164,7 +164,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     }
 
     _scheduleNightWallpaperSwitch(secondsLeftForNightWallpaperSwitch) {
-        log('Scheduling switch for night wallpaper');
+        log('Scheduling switch for night wallpaper...');
         if (secondsLeftForNightWallpaperSwitch == undefined) {
             const nightSwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('night-wallpaper-switch-time'));
             const now = GLib.DateTime.new_now_local();

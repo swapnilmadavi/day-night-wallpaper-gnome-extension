@@ -160,9 +160,9 @@ var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
     }
 
     _padValueWithLeadingZero(spinButton) {
-        let adjustment = spinButton.get_adjustment();
-        let value = parseInt(adjustment.get_value());
-        let paddedValue = (value < 10 ? '0' : '') + value;
+        const adjustment = spinButton.get_adjustment();
+        const value = parseInt(adjustment.get_value());
+        const paddedValue = (value < 10 ? '0' : '') + value;
         spinButton.set_text(paddedValue);
         return true;
     }
