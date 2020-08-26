@@ -13,19 +13,13 @@ let dayNigthWallpaperExtension;
 
 const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     constructor(settings) {
-        this.settings = settings;
+        this._settings = settings;
         this._scheduledTimeoutId = null;
     }
 
     start() {
         this._connectSettings();
-
-        const nextWallpaperSwitch = this._decideNextWallpaperSwitch();
-        if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
-            this._scheduleDayWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
-        } else {
-            this._scheduleNightWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
-        }
+        this._update();
     }
 
     stop() {
@@ -37,6 +31,26 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         this._scheduledTimeoutId = null;
     }
 
+    _update() {
+        const nextWallpaperSwitch = this._decideNextWallpaperSwitch();
+        const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
+        const currentBackgroundUri = backgroundSettings.get_string('picture-uri');
+
+        if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
+            const nightWallpaperUri = this._settings.get_string('night-wallpaper');
+            if (currentBackgroundUri != nightWallpaperUri) {
+                this._setDesktopBackground(nightWallpaperUri);
+            }
+            this._scheduleDayWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
+        } else {
+            const dayWallpaperUri = this._settings.get_string('day-wallpaper');
+            if (currentBackgroundUri != dayWallpaperUri) {
+                this._setDesktopBackground(dayWallpaperUri);
+            }
+            this._scheduleNightWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
+        }
+    }
+
     _setDesktopBackground(uri) {
         log(`Setting desktop background => ${uri}`);
         const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
@@ -44,8 +58,8 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     }
 
     _decideNextWallpaperSwitch() {
-        const dayWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('day-wallpaper-switch-time'));
-        const nightWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('night-wallpaper-switch-time'));
+        const dayWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(this._settings.get_double('day-wallpaper-switch-time'));
+        const nightWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(this._settings.get_double('night-wallpaper-switch-time'));
 
         const now = GLib.DateTime.new_now_local();
         const secondsLeftForDayWallpaperSwitch = this._calculateSecondsLeftForSwitch(dayWallpaperSwitchTime, now);
@@ -125,17 +139,17 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     }
 
     _onDayWallpaperTimeout() {
-        const uri = this.settings.get_string('day-wallpaper');
+        const uri = this._settings.get_string('day-wallpaper');
         this._setDesktopBackground(uri);
         this._scheduleNightWallpaperSwitch();
         return false;
     }
 
     _onNightWallpaperTimeout() {
-        const uri = this.settings.get_string('night-wallpaper');
+        const uri = this._settings.get_string('night-wallpaper');
         this._setDesktopBackground(uri);
         this._scheduleDayWallpaperSwitch();
-        return false
+        return false;
     }
 
     _onWallpaperSwitchTimeChanged(settings, key) {
@@ -144,19 +158,15 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         }
 
         this._scheduledTimeoutId = Mainloop.timeout_add_seconds(2, () => {
-            const nextWallpaperSwitch = this._decideNextWallpaperSwitch();
-            if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
-                this._scheduleDayWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
-            } else {
-                this._scheduleNightWallpaperSwitch(nextWallpaperSwitch.secondsLeftForSwitch);
-            }
+            this._update();
+            return false;
         });
     }
 
     _scheduleDayWallpaperSwitch(secondsLeftForDayWallpaperSwitch) {
         log('Scheduling switch for day wallpaper...');
         if (secondsLeftForDayWallpaperSwitch == undefined) {
-            const daySwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('day-wallpaper-switch-time'));
+            const daySwitchTime = Utils.SwitchTime.newFromSettings(this._settings.get_double('day-wallpaper-switch-time'));
             const now = GLib.DateTime.new_now_local();
             secondsLeftForDayWallpaperSwitch = this._calculateSecondsLeftForSwitch(daySwitchTime, now);
         }
@@ -166,7 +176,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     _scheduleNightWallpaperSwitch(secondsLeftForNightWallpaperSwitch) {
         log('Scheduling switch for night wallpaper...');
         if (secondsLeftForNightWallpaperSwitch == undefined) {
-            const nightSwitchTime = Utils.SwitchTime.newFromSettings(this.settings.get_double('night-wallpaper-switch-time'));
+            const nightSwitchTime = Utils.SwitchTime.newFromSettings(this._settings.get_double('night-wallpaper-switch-time'));
             const now = GLib.DateTime.new_now_local();
             secondsLeftForNightWallpaperSwitch = this._calculateSecondsLeftForSwitch(nightSwitchTime, now);
         }
@@ -174,13 +184,13 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
     }
 
     _connectSettings() {
-        this._onDayWallpaperSwitchTimeChangedId = this.settings.connect('changed::day-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
-        this._onNightWallpaperSwitchTimeChangedId = this.settings.connect('changed::night-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
+        this._onDayWallpaperSwitchTimeChangedId = this._settings.connect('changed::day-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
+        this._onNightWallpaperSwitchTimeChangedId = this._settings.connect('changed::night-wallpaper-switch-time', this._onWallpaperSwitchTimeChanged.bind(this));
     }
 
     _disconnectSettings() {
-        this.settings.disconnect(this._onDayWallpaperSwitchTimeChangedId);
-        this.settings.disconnect(this._onNightWallpaperSwitchTimeChangedId);
+        this._settings.disconnect(this._onDayWallpaperSwitchTimeChangedId);
+        this._settings.disconnect(this._onNightWallpaperSwitchTimeChangedId);
     }
 }
 
