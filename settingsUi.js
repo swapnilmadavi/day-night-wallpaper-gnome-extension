@@ -168,6 +168,31 @@ var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
     }
 }
 
+var AboutSection = class AboutSection extends Gtk.Box {
+    _init() {
+        super._init({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 6,
+            halign: Gtk.Align.CENTER
+        })
+
+        const createdByLabel = new Gtk.Label({
+            label: '<span font="10" foreground="#6c757d">Created by Swapnil Madavi</span>',
+            halign: Gtk.Align.CENTER,
+            use_markup: true
+        });
+
+        const homepageLabel = new Gtk.Label({
+            label: '<a href="https://github.com/swapnilmadavi/day-night-wallpaper-gnome-extension"><span foreground="#6c757d">Homepage</span></a>',
+            halign: Gtk.Align.CENTER,
+            use_markup: true
+        });
+
+        this.pack_start(createdByLabel, false, true, 0);
+        this.pack_start(homepageLabel, false, true, 0);
+    }
+}
+
 // Compatibility with gnome-shell >= 3.32
 if (SHELL_MINOR > 30) {
     WallpapersSection = GObject.registerClass(
@@ -183,5 +208,10 @@ if (SHELL_MINOR > 30) {
     SwitchTimeWidget = GObject.registerClass(
         { GTypeName: 'SwitchTimeWidget' },
         SwitchTimeWidget
+    );
+
+    AboutSection = GObject.registerClass(
+        { GTypeName: 'AboutSection' },
+        AboutSection
     );
 }

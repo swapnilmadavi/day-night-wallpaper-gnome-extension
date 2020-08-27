@@ -65,6 +65,11 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
 
         this.pack_start(switchTimesSectionLabel, false, true, 0);
         this.pack_start(this.switchTimesSection, false, true, 0);
+
+        // About section
+        const aboutSection = new SettingsUi.AboutSection();
+        aboutSection.set_margin_top(30);
+        this.pack_start(aboutSection, false, true, 0);
     }
 
     _readDayWallpaperSwitchTime(dayWallpaperSwitchTimeFromSettings) {
