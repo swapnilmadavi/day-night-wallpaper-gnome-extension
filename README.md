@@ -1,6 +1,10 @@
 # day-night-wallpaper-gnome-extension
 A simple GNOME extension to set separate wallpapers for day and night time.
 
+<p align="center">
+  <img src="screenshot-prefs.png" alt="Preferences" width=600/>
+</p>
+
 ## Installation
 
 ### Manual
