@@ -2,20 +2,21 @@
 
 'use strict';
 
-const { Gio, GObject, Gtk } = imports.gi;
+const Gtk = imports.gi.Gtk;
+
+const Lang = imports.lang;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
 const Utils = Me.imports.utils;
 
-// For compatibility checks
-const Config = imports.misc.config;
-const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
+const DayNightWallpaperPrefsWidget = new Lang.Class({
+    Name: 'DayNightWallpaperPrefsWidget',
+    Extends: Gtk.Box,
 
-let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gtk.Box {
     _init(settings) {
-        super._init({
+        this.parent({
             margin: 18,
             spacing: 12,
             orientation: Gtk.Orientation.VERTICAL
@@ -70,24 +71,24 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
         const aboutSection = new SettingsUi.AboutSection();
         aboutSection.set_margin_top(30);
         this.pack_start(aboutSection, false, true, 0);
-    }
+    },
 
     _readDayWallpaperSwitchTime(dayWallpaperSwitchTimeFromSettings) {
         const dayWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(dayWallpaperSwitchTimeFromSettings);
         this.switchTimesSection.setDayWallpaperSwitchTime(dayWallpaperSwitchTime.switchHour, dayWallpaperSwitchTime.switchMinute);
-    }
+    },
 
     _readNightWallpaperSwitchTime(nightWallpaperSwitchTimeFromSettings) {
         const nightWallpaperSwitchTime = Utils.SwitchTime.newFromSettings(nightWallpaperSwitchTimeFromSettings);
         this.switchTimesSection.setNightWallpaperSwitchTime(nightWallpaperSwitchTime.switchHour, nightWallpaperSwitchTime.switchMinute);
-    }
+    },
 
     _onDayWallpaperSwitchTimeChanged(spinButton) {
         const daySwitchHour = this.switchTimesSection.daySwitchTimeWidget.hourSpinButton.get_value_as_int();
         const daySwitchMinute = this.switchTimesSection.daySwitchTimeWidget.minuteSpinButton.get_value_as_int();
         const daySwitchTime = new Utils.SwitchTime(daySwitchHour, daySwitchMinute);
         this._settings.set_double('day-wallpaper-switch-time', daySwitchTime.toSettingsFormat());
-    }
+    },
 
     _onNightWallpaperSwitchTimeChanged(spinButton) {
         const nightSwitchHour = this.switchTimesSection.nightSwitchTimeWidget.hourSpinButton.get_value_as_int();
@@ -95,30 +96,14 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
         const nightSwitchTime = new Utils.SwitchTime(nightSwitchHour, nightSwitchMinute);
         this._settings.set_double('night-wallpaper-switch-time', nightSwitchTime.toSettingsFormat());
     }
-}
-
-// Compatibility with gnome-shell >= 3.32
-if (SHELL_MINOR > 30) {
-    DayNightWallpaperPrefsWidget = GObject.registerClass(
-        { GTypeName: 'DayNightWallpaperPrefsWidget' },
-        DayNightWallpaperPrefsWidget
-    );
-}
+});
 
 function init() {
-    const settings = ExtensionUtils.getSettings();
-
-    if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
-    }
-
-    if (!Utils.isWallpaperSet(settings, 'night-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'night-wallpaper')
-    }
+    Utils.checkExtensionSettings();
 }
 
 function buildPrefsWidget() {
-    const settings = ExtensionUtils.getSettings();
+    const settings = Utils.getExtensionSettings();
     const prefsWidget = new DayNightWallpaperPrefsWidget(settings);
     prefsWidget.show_all();
 

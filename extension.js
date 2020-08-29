@@ -2,7 +2,8 @@
 
 'use strict';
 
-const { Gio, GLib } = imports.gi;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -19,7 +20,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
     start() {
         this._connectSettings();
-        this._update();
+        this._refresh();
     }
 
     stop() {
@@ -31,10 +32,9 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         this._scheduledTimeoutId = null;
     }
 
-    _update() {
+    _refresh() {
         const nextWallpaperSwitch = this._decideNextWallpaperSwitch();
-        const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
-        const currentBackgroundUri = backgroundSettings.get_string('picture-uri');
+        const currentBackgroundUri = this._getDesktopBackground();
 
         if (nextWallpaperSwitch.type == Utils.switchType.DAY) {
             const nightWallpaperUri = this._settings.get_string('night-wallpaper');
@@ -53,8 +53,13 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
     _setDesktopBackground(uri) {
         log(`Setting desktop background => ${uri}`);
-        const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
+        const backgroundSettings = Utils.getBackgroundSettings();
         backgroundSettings.set_string('picture-uri', uri);
+    }
+
+    _getDesktopBackground() {
+        const backgroundSettings = Utils.getBackgroundSettings();
+        return backgroundSettings.get_string('picture-uri');
     }
 
     _decideNextWallpaperSwitch() {
@@ -98,8 +103,9 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
      * @returns {GLib.DateTime} Switch DateTime object
      */
     _constructSwitchDateTime(switchTime, now) {
+        let timezone = GLib.TimeZone.new_local();
         let switchDateTime = GLib.DateTime.new(
-            now.get_timezone(),
+            timezone,
             now.get_year(),
             now.get_month(),
             now.get_day_of_month(),
@@ -158,7 +164,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         }
 
         this._scheduledTimeoutId = Mainloop.timeout_add_seconds(2, () => {
-            this._update();
+            this._refresh();
             return false;
         });
     }
@@ -196,21 +202,12 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
 
 function init() {
     log(`Initializing ${Me.metadata.name}...`);
-
-    const settings = ExtensionUtils.getSettings();
-
-    if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper');
-    }
-
-    if (!Utils.isWallpaperSet(settings, 'night-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'night-wallpaper');
-    }
+    Utils.checkExtensionSettings();
 }
 
 function enable() {
     log(`Enabling ${Me.metadata.name}...`);
-    const settings = ExtensionUtils.getSettings();
+    const settings = Utils.getExtensionSettings();
     dayNigthWallpaperExtension = new DayNightWallpaperExtension(settings);
     dayNigthWallpaperExtension.start();
 }

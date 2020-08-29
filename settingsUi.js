@@ -2,15 +2,16 @@
 
 'use strict';
 
-const { GObject, Gtk } = imports.gi;
+const Gtk = imports.gi.Gtk;
 
-// For compatibility checks
-const Config = imports.misc.config;
-const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
+const Lang = imports.lang;
 
-var WallpapersSection = class WallpapersSection extends Gtk.Grid {
+var WallpapersSection = new Lang.Class({
+    Name: 'WallpapersSection',
+    Extends: Gtk.Grid,
+
     _init() {
-        super._init({
+        this.parent({
             column_spacing: 12,
             row_spacing: 12,
         })
@@ -58,48 +59,54 @@ var WallpapersSection = class WallpapersSection extends Gtk.Grid {
 
         this.attach(nightWallpaperLabel, 0, 2, 1, 1);
         this.attach_next_to(this.nightWallpaperChooserButton, nightWallpaperLabel, Gtk.PositionType.RIGHT, 1, 1);
-    }
+    },
 
     setDayWallpaperUri(uri) {
         this.dayWallpaperChooserButton.set_uri(uri);
-    }
+    },
 
     setNightWallpaperUri(uri) {
         this.nightWallpaperChooserButton.set_uri(uri);
-    }
+    },
 
     getDayWallpaperUri() {
         return this.dayWallpaperChooserButton.get_uri();
-    }
+    },
 
     getNightWallpaperUri() {
         return this.nightWallpaperChooserButton.get_uri();
     }
-}
+});
 
-var SwitchTimesSection = class SwitchTimesSection extends Gtk.Box {
+var SwitchTimesSection = new Lang.Class({
+    Name: 'SwitchTimesSection',
+    Extends: Gtk.Box,
+
     _init() {
-        super._init({ spacing: 6 })
+        this.parent({ spacing: 6 })
 
         this.daySwitchTimeWidget = new SwitchTimeWidget('Day Time');
         this.nightSwitchTimeWidget = new SwitchTimeWidget('Night Time');
 
         this.pack_start(this.daySwitchTimeWidget, true, true, 0);
         this.pack_start(this.nightSwitchTimeWidget, true, true, 0);
-    }
+    },
 
     setDayWallpaperSwitchTime(switchHour, switchMinute) {
         this.daySwitchTimeWidget.setSwitchTime(switchHour, switchMinute);
-    }
+    },
 
     setNightWallpaperSwitchTime(switchHour, switchMinute) {
         this.nightSwitchTimeWidget.setSwitchTime(switchHour, switchMinute);
     }
-}
+});
 
-var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
+var SwitchTimeWidget = new Lang.Class({
+    Name: 'SwitchTimeWidget',
+    Extends: Gtk.Box,
+
     _init(title) {
-        super._init({
+        this.parent({
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 6,
             halign: Gtk.Align.CENTER
@@ -152,12 +159,12 @@ var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
 
         this.pack_start(this.timeWidget, true, true, 0);
         this.pack_start(switchTimeLabel, true, true, 0);
-    }
+    },
 
     setSwitchTime(switchHour, switchMinute) {
         this.hourSpinButton.set_value(switchHour);
         this.minuteSpinButton.set_value(switchMinute);
-    }
+    },
 
     _padValueWithLeadingZero(spinButton) {
         const adjustment = spinButton.get_adjustment();
@@ -166,11 +173,14 @@ var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
         spinButton.set_text(paddedValue);
         return true;
     }
-}
+});
 
-var AboutSection = class AboutSection extends Gtk.Box {
+var AboutSection = new Lang.Class({
+    Name: 'AboutSection',
+    Extends: Gtk.Box,
+
     _init() {
-        super._init({
+        this.parent({
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 6,
             halign: Gtk.Align.CENTER
@@ -191,27 +201,4 @@ var AboutSection = class AboutSection extends Gtk.Box {
         this.pack_start(createdByLabel, false, true, 0);
         this.pack_start(homepageLabel, false, true, 0);
     }
-}
-
-// Compatibility with gnome-shell >= 3.32
-if (SHELL_MINOR > 30) {
-    WallpapersSection = GObject.registerClass(
-        { GTypeName: 'WallpapersSection' },
-        WallpapersSection
-    );
-
-    SwitchTimesSection = GObject.registerClass(
-        { GTypeName: 'SwitchTimesSection' },
-        SwitchTimesSection
-    );
-
-    SwitchTimeWidget = GObject.registerClass(
-        { GTypeName: 'SwitchTimeWidget' },
-        SwitchTimeWidget
-    );
-
-    AboutSection = GObject.registerClass(
-        { GTypeName: 'AboutSection' },
-        AboutSection
-    );
-}
+});
