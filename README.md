@@ -5,6 +5,9 @@ A simple GNOME extension to set separate wallpapers for day and night time.
   <img src="screenshot-prefs.png" alt="Preferences" width=600/>
 </p>
 
+This extension supports GNOME shell versions 3.28 - 3.36.  
+Please check the branch `gnome-shell-3-28-3-30` for shell versions 3.28 - 3.30.
+
 ## Installation
 
 ### Manual
