@@ -4,11 +4,8 @@
 
 const { GObject, Gtk } = imports.gi;
 
-// For compatibility checks
-const Config = imports.misc.config;
-const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
-
-var WallpapersSection = class WallpapersSection extends Gtk.Grid {
+var WallpapersSection = GObject.registerClass(
+class WallpapersSection extends Gtk.Grid {
     _init() {
         super._init({
             column_spacing: 12,
@@ -75,9 +72,10 @@ var WallpapersSection = class WallpapersSection extends Gtk.Grid {
     getNightWallpaperUri() {
         return this.nightWallpaperChooserButton.get_uri();
     }
-}
+});
 
-var SwitchTimesSection = class SwitchTimesSection extends Gtk.Box {
+var SwitchTimesSection = GObject.registerClass(
+class SwitchTimesSection extends Gtk.Box {
     _init() {
         super._init({ spacing: 6 })
 
@@ -95,9 +93,10 @@ var SwitchTimesSection = class SwitchTimesSection extends Gtk.Box {
     setNightWallpaperSwitchTime(switchHour, switchMinute) {
         this.nightSwitchTimeWidget.setSwitchTime(switchHour, switchMinute);
     }
-}
+});
 
-var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
+var SwitchTimeWidget = GObject.registerClass(
+class SwitchTimeWidget extends Gtk.Box {
     _init(title) {
         super._init({
             orientation: Gtk.Orientation.VERTICAL,
@@ -166,9 +165,10 @@ var SwitchTimeWidget = class SwitchTimeWidget extends Gtk.Box {
         spinButton.set_text(paddedValue);
         return true;
     }
-}
+});
 
-var AboutSection = class AboutSection extends Gtk.Box {
+var AboutSection = GObject.registerClass(
+class AboutSection extends Gtk.Box {
     _init() {
         super._init({
             orientation: Gtk.Orientation.VERTICAL,
@@ -191,27 +191,4 @@ var AboutSection = class AboutSection extends Gtk.Box {
         this.pack_start(createdByLabel, false, true, 0);
         this.pack_start(homepageLabel, false, true, 0);
     }
-}
-
-// Compatibility with gnome-shell >= 3.32
-if (SHELL_MINOR > 30) {
-    WallpapersSection = GObject.registerClass(
-        { GTypeName: 'WallpapersSection' },
-        WallpapersSection
-    );
-
-    SwitchTimesSection = GObject.registerClass(
-        { GTypeName: 'SwitchTimesSection' },
-        SwitchTimesSection
-    );
-
-    SwitchTimeWidget = GObject.registerClass(
-        { GTypeName: 'SwitchTimeWidget' },
-        SwitchTimeWidget
-    );
-
-    AboutSection = GObject.registerClass(
-        { GTypeName: 'AboutSection' },
-        AboutSection
-    );
-}
+});

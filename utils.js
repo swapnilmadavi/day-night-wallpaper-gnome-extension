@@ -2,20 +2,37 @@
 
 'use strict';
 
+const ExtensionUtils = imports.misc.extensionUtils;
+
 var switchType = {
     DAY: 1,
     NIGHT: 2
 }
 
-function isWallpaperSet(extensionSettings, wallpaperKey) {
+function getBackgroundSettings() {
+    return ExtensionUtils.getSettings('org.gnome.desktop.background');
+}
+
+function isWallpaperSelected(extensionSettings, wallpaperKey) {
     return extensionSettings.get_string(wallpaperKey) != '';
 }
 
 function fallbackToSystemWallpaper(extensionSettings, wallpaperKey) {
-    const Gio = imports.gi.Gio;
-    let gnomeSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
-    let systemBackgroundUri = gnomeSettings.get_string('picture-uri');
+    const backgroundSettings = getBackgroundSettings();
+    const systemBackgroundUri = backgroundSettings.get_string('picture-uri');
     extensionSettings.set_string(wallpaperKey, systemBackgroundUri);
+}
+
+function checkExtensionSettings() {
+    const extensionSettings = ExtensionUtils.getSettings();
+
+    if (!isWallpaperSelected(extensionSettings, 'day-wallpaper')) {
+        fallbackToSystemWallpaper(extensionSettings, 'day-wallpaper')
+    }
+
+    if (!isWallpaperSelected(extensionSettings, 'night-wallpaper')) {
+        fallbackToSystemWallpaper(extensionSettings, 'night-wallpaper')
+    }
 }
 
 var SwitchTime = class SwitchTime {

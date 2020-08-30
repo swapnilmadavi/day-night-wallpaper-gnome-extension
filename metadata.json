@@ -4,8 +4,6 @@
     "description": "Set separate wallpapers for day and night time.",
     "version": 1,
     "shell-version": [
-        "3.28",
-        "3.30",
         "3.32",
         "3.34",
         "3.36"

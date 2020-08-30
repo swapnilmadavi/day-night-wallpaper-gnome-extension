@@ -9,11 +9,8 @@ const Me = ExtensionUtils.getCurrentExtension();
 const SettingsUi = Me.imports.settingsUi;
 const Utils = Me.imports.utils;
 
-// For compatibility checks
-const Config = imports.misc.config;
-const SHELL_MINOR = parseInt(Config.PACKAGE_VERSION.split('.')[1]);
-
-let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gtk.Box {
+let DayNightWallpaperPrefsWidget = GObject.registerClass(
+class DayNightWallpaperPrefsWidget extends Gtk.Box {
     _init(settings) {
         super._init({
             margin: 18,
@@ -95,26 +92,10 @@ let DayNightWallpaperPrefsWidget = class DayNightWallpaperPrefsWidget extends Gt
         const nightSwitchTime = new Utils.SwitchTime(nightSwitchHour, nightSwitchMinute);
         this._settings.set_double('night-wallpaper-switch-time', nightSwitchTime.toSettingsFormat());
     }
-}
-
-// Compatibility with gnome-shell >= 3.32
-if (SHELL_MINOR > 30) {
-    DayNightWallpaperPrefsWidget = GObject.registerClass(
-        { GTypeName: 'DayNightWallpaperPrefsWidget' },
-        DayNightWallpaperPrefsWidget
-    );
-}
+});
 
 function init() {
-    const settings = ExtensionUtils.getSettings();
-
-    if (!Utils.isWallpaperSet(settings, 'day-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'day-wallpaper')
-    }
-
-    if (!Utils.isWallpaperSet(settings, 'night-wallpaper')) {
-        Utils.fallbackToSystemWallpaper(settings, 'night-wallpaper')
-    }
+    Utils.checkExtensionSettings();
 }
 
 function buildPrefsWidget() {
