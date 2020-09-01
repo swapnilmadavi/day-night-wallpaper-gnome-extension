@@ -6,7 +6,6 @@ const { Gio, GLib } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Mainloop = imports.mainloop;
 const Utils = Me.imports.utils;
 
 let dayNigthWallpaperExtension;
@@ -26,7 +25,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         this._disconnectSettings();
 
         if (this._scheduledTimeoutId) {
-            Mainloop.source_remove(this._scheduledTimeoutId);
+            GLib.source_remove(this._scheduledTimeoutId);
         }
         this._scheduledTimeoutId = null;
     }
@@ -147,24 +146,24 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
         const uri = this._settings.get_string('day-wallpaper');
         this._setDesktopBackground(uri);
         this._scheduleNightWallpaperSwitch();
-        return false;
+        return GLib.SOURCE_REMOVE;
     }
 
     _onNightWallpaperTimeout() {
         const uri = this._settings.get_string('night-wallpaper');
         this._setDesktopBackground(uri);
         this._scheduleDayWallpaperSwitch();
-        return false;
+        return GLib.SOURCE_REMOVE;
     }
 
     _onWallpaperSwitchTimeChanged(settings, key) {
         if (this._scheduledTimeoutId) {
-            Mainloop.source_remove(this._scheduledTimeoutId);
+            GLib.source_remove(this._scheduledTimeoutId);
         }
 
-        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(2, () => {
+        this._scheduledTimeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
             this._refresh();
-            return false;
+            return GLib.SOURCE_REMOVE;
         });
     }
 
@@ -175,7 +174,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
             const now = GLib.DateTime.new_now_local();
             secondsLeftForDayWallpaperSwitch = this._calculateSecondsLeftForSwitch(daySwitchTime, now);
         }
-        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(secondsLeftForDayWallpaperSwitch, this._onDayWallpaperTimeout.bind(this));
+        this._scheduledTimeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, secondsLeftForDayWallpaperSwitch, this._onDayWallpaperTimeout.bind(this));
     }
 
     _scheduleNightWallpaperSwitch(secondsLeftForNightWallpaperSwitch) {
@@ -185,7 +184,7 @@ const DayNightWallpaperExtension = class DayNightWallpaperExtension {
             const now = GLib.DateTime.new_now_local();
             secondsLeftForNightWallpaperSwitch = this._calculateSecondsLeftForSwitch(nightSwitchTime, now);
         }
-        this._scheduledTimeoutId = Mainloop.timeout_add_seconds(secondsLeftForNightWallpaperSwitch, this._onNightWallpaperTimeout.bind(this));
+        this._scheduledTimeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, secondsLeftForNightWallpaperSwitch, this._onNightWallpaperTimeout.bind(this));
     }
 
     _connectSettings() {
