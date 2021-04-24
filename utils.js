@@ -13,6 +13,11 @@ function getBackgroundSettings() {
     return ExtensionUtils.getSettings('org.gnome.desktop.background');
 }
 
+function getAvailablePictureOptions() {
+    const backgroundSettings = getBackgroundSettings();
+    return backgroundSettings.settings_schema.get_key('picture-options').get_range().get_child_value(1).get_child_value(0).deep_unpack();
+}
+
 function isWallpaperSelected(extensionSettings, wallpaperKey) {
     return extensionSettings.get_string(wallpaperKey) != '';
 }
@@ -23,15 +28,23 @@ function fallbackToSystemWallpaper(extensionSettings, wallpaperKey) {
     extensionSettings.set_string(wallpaperKey, systemBackgroundUri);
 }
 
+function fallbackToSystemWallpaperAdjustment(extensionSettings, wallpaperAdjustmentKey) {
+    const backgroundSettings = getBackgroundSettings();
+    const systemBackgroundAdjustment = backgroundSettings.get_string('picture-options');
+    extensionSettings.set_string(wallpaperAdjustmentKey, systemBackgroundAdjustment);
+}
+
 function checkExtensionSettings() {
     const extensionSettings = ExtensionUtils.getSettings();
 
     if (!isWallpaperSelected(extensionSettings, 'day-wallpaper')) {
         fallbackToSystemWallpaper(extensionSettings, 'day-wallpaper')
+        fallbackToSystemWallpaperAdjustment(extensionSettings, 'day-wallpaper-adjustment')
     }
 
     if (!isWallpaperSelected(extensionSettings, 'night-wallpaper')) {
         fallbackToSystemWallpaper(extensionSettings, 'night-wallpaper')
+        fallbackToSystemWallpaperAdjustment(extensionSettings, 'night-wallpaper-adjustment')
     }
 }
 

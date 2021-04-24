@@ -26,5 +26,25 @@
       <description>Time at which the night wallpaper is set</description>
     </key>
 
+    <key name="day-wallpaper-adjustment" type="s">
+      <default>''</default>
+      <summary>Day wallpaper adjustment</summary>
+      <description>
+        Determines how the day wallpaper is rendered.
+        Possible values are “none”, “wallpaper”, “centered”, “scaled”,
+        “stretched”, “zoom”, “spanned”.
+      </description>
+    </key>
+
+    <key name="night-wallpaper-adjustment" type="s">
+      <default>''</default>
+      <summary>Night wallpaper adjustment</summary>
+      <description>
+        Determines how the night wallpaper is rendered.
+        Possible values are “none”, “wallpaper”, “centered”, “scaled”,
+        “stretched”, “zoom”, “spanned”.
+      </description>
+    </key>
+
   </schema>
 </schemalist>
