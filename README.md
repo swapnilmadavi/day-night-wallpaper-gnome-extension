@@ -5,7 +5,7 @@ A simple GNOME extension to set separate wallpapers for day and night time.
   <img src="screenshot-prefs-v2.png" alt="Day Night Wallpaper preferences" width="600"/>
 </p>
 
-This extension supports GNOME shell versions 3.28 - 3.36.  
+This extension automatically switches the wallpapers at the set times. It supports GNOME shell versions 3.28 - 3.38.  
 Please check the branch `gnome-shell-3-28-3-30` for shell versions 3.28 - 3.30.
 
 ## Installation
@@ -21,3 +21,7 @@ git clone https://github.com/swapnilmadavi/day-night-wallpaper-gnome-extension.g
 ```
 Restart the gnome-shell by pressing `Alt+F2`, then type `r` and press the `Enter` key.  
 Now you can enable the extension from either Extensions or Tweaks application.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.

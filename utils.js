@@ -7,7 +7,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 var wallpaperMode = {
     DAY: 1,
     NIGHT: 2
-}
+};
 
 function getDesktopBackgroundSettings() {
     return ExtensionUtils.getSettings('org.gnome.desktop.background');
@@ -18,7 +18,7 @@ function getAvailablePictureOptions() {
     return backgroundSettings.settings_schema.get_key('picture-options').get_range().get_child_value(1).get_child_value(0).deep_unpack();
 }
 
-function isWallpaperSelected(extensionSettings, wallpaperKey) {
+function isWallpaperOptionSelected(extensionSettings, wallpaperKey) {
     return extensionSettings.get_string(wallpaperKey) != '';
 }
 
@@ -37,14 +37,20 @@ function fallbackToSystemWallpaperAdjustment(extensionSettings, wallpaperAdjustm
 function checkExtensionSettings() {
     const extensionSettings = ExtensionUtils.getSettings();
 
-    if (!isWallpaperSelected(extensionSettings, 'day-wallpaper')) {
-        fallbackToSystemWallpaper(extensionSettings, 'day-wallpaper')
-        fallbackToSystemWallpaperAdjustment(extensionSettings, 'day-wallpaper-adjustment')
+    if (!isWallpaperOptionSelected(extensionSettings, 'day-wallpaper')) {
+        fallbackToSystemWallpaper(extensionSettings, 'day-wallpaper');
     }
 
-    if (!isWallpaperSelected(extensionSettings, 'night-wallpaper')) {
-        fallbackToSystemWallpaper(extensionSettings, 'night-wallpaper')
-        fallbackToSystemWallpaperAdjustment(extensionSettings, 'night-wallpaper-adjustment')
+    if (!isWallpaperOptionSelected(extensionSettings, 'day-wallpaper-adjustment')) {
+        fallbackToSystemWallpaperAdjustment(extensionSettings, 'day-wallpaper-adjustment');
+    }
+
+    if (!isWallpaperOptionSelected(extensionSettings, 'night-wallpaper')) {
+        fallbackToSystemWallpaper(extensionSettings, 'night-wallpaper');
+    }
+
+    if (!isWallpaperOptionSelected(extensionSettings, 'night-wallpaper-adjustment')) {
+        fallbackToSystemWallpaperAdjustment(extensionSettings, 'night-wallpaper-adjustment');
     }
 }
 

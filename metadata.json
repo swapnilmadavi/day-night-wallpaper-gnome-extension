@@ -6,7 +6,8 @@
     "shell-version": [
         "3.32",
         "3.34",
-        "3.36"
+        "3.36",
+        "3.38"
     ],
     "settings-schema": "org.gnome.shell.extensions.day-night-wallpaper",
     "url": "https://github.com/swapnilmadavi/day-night-wallpaper-gnome-extension"
